@@ -2,12 +2,12 @@ package org.insightech.er.editor.model.dbexport.excel.sheet_generator;
 
 import java.awt.Dimension;
 
-import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
-import org.apache.poi.hssf.usermodel.HSSFPatriarch;
-import org.apache.poi.hssf.usermodel.HSSFPicture;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFPicture;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.util.POIUtils;
 import org.insightech.er.util.POIUtils.CellLocation;
 
@@ -21,7 +21,7 @@ public class PictureSheetGenerator {
 
     private final int excelPictureType;
 
-    public PictureSheetGenerator(final HSSFWorkbook workbook, final byte[] imageBuffer, final int excelPictureType) {
+    public PictureSheetGenerator(final XSSFWorkbook workbook, final byte[] imageBuffer, final int excelPictureType) {
         this.imageBuffer = imageBuffer;
         this.excelPictureType = excelPictureType;
 
@@ -30,7 +30,7 @@ public class PictureSheetGenerator {
         }
     }
 
-    public void setImage(final HSSFWorkbook workbook, final HSSFSheet sheet) {
+    public void setImage(final XSSFWorkbook workbook, final XSSFSheet sheet) {
         final CellLocation cellLocation = POIUtils.findMatchCell(sheet, "\\" + KEYWORD_ER + ".*");
 
         if (cellLocation != null) {
@@ -52,13 +52,13 @@ public class PictureSheetGenerator {
         }
     }
 
-    private void setImage(final HSSFWorkbook workbook, final HSSFSheet sheet, final CellLocation cellLocation, int width, int height) {
+    private void setImage(final XSSFWorkbook workbook, final XSSFSheet sheet, final CellLocation cellLocation, int width, int height) {
         POIUtils.setCellValue(sheet, cellLocation, "");
 
         if (imageBuffer != null) {
-            final HSSFPatriarch patriarch = sheet.createDrawingPatriarch();
-
-            final HSSFPicture picture = patriarch.createPicture(new HSSFClientAnchor(), pictureIndex);
+            final XSSFDrawing patriarch = sheet.createDrawingPatriarch();
+            final XSSFClientAnchor preferredSize = getPreferredSize(sheet, new XSSFClientAnchor(0, 0, 0, 0, (short) cellLocation.c, cellLocation.r, (short) 0, 0), width, height);
+            final XSSFPicture picture = patriarch.createPicture(preferredSize, pictureIndex);
 
             final Dimension dimension = picture.getImageDimension();
             final float rate = (float) dimension.width / (float) dimension.height;
@@ -88,13 +88,10 @@ public class PictureSheetGenerator {
                     }
                 }
             }
-
-            final HSSFClientAnchor preferredSize = getPreferredSize(sheet, new HSSFClientAnchor(0, 0, 0, 0, (short) cellLocation.c, cellLocation.r, (short) 0, 0), width, height);
-            picture.setAnchor(preferredSize);
         }
     }
 
-    public HSSFClientAnchor getPreferredSize(final HSSFSheet sheet, final HSSFClientAnchor anchor, final int width, final int height) {
+    public XSSFClientAnchor getPreferredSize(final XSSFSheet sheet, final XSSFClientAnchor anchor, final int width, final int height) {
         float w = 0.0F;
         w += getColumnWidthInPixels(sheet, anchor.getCol1()) * (1 - anchor.getDx1() / 1024);
 
@@ -125,14 +122,14 @@ public class PictureSheetGenerator {
         return anchor;
     }
 
-    private float getColumnWidthInPixels(final HSSFSheet sheet, final int column) {
+    private float getColumnWidthInPixels(final XSSFSheet sheet, final int column) {
         final int cw = sheet.getColumnWidth(column);
         final float px = getPixelWidth(sheet, column);
         return cw / px;
     }
 
-    private float getRowHeightInPixels(final HSSFSheet sheet, final int i) {
-        final HSSFRow row = sheet.getRow(i);
+    private float getRowHeightInPixels(final XSSFSheet sheet, final int i) {
+        final XSSFRow row = sheet.getRow(i);
         float height;
         if (row != null) {
             height = row.getHeight();
@@ -143,7 +140,7 @@ public class PictureSheetGenerator {
         return height / 15F;
     }
 
-    private float getPixelWidth(final HSSFSheet sheet, final int column) {
+    private float getPixelWidth(final XSSFSheet sheet, final int column) {
         final int def = sheet.getDefaultColumnWidth() * 256;
         final int cw = sheet.getColumnWidth(column);
         return cw != def ? 36.56F : 32F;

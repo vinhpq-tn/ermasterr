@@ -2,9 +2,9 @@ package org.insightech.er.editor.model.dbexport.excel.sheet_generator;
 
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.editor.model.ERDiagram;
 import org.insightech.er.editor.model.ObjectModel;
 import org.insightech.er.editor.model.dbexport.excel.ExportToExcelManager.LoopDefinition;
@@ -25,14 +25,14 @@ public class ColumnSheetGenerator extends AbstractSheetGenerator {
         columnTemplate = null;
     }
 
-    public void setAllColumnsData(final ProgressMonitor monitor, final HSSFWorkbook workbook, final HSSFSheet sheet, final ERDiagram diagram) throws InterruptedException {
+    public void setAllColumnsData(final ProgressMonitor monitor, final XSSFWorkbook workbook, final XSSFSheet sheet, final ERDiagram diagram) throws InterruptedException {
         clear();
 
         final CellLocation cellLocation = POIUtils.findCell(sheet, FIND_KEYWORDS_OF_COLUMN);
 
         if (cellLocation != null) {
             int rowNum = cellLocation.r;
-            final HSSFRow templateRow = sheet.getRow(rowNum);
+            final XSSFRow templateRow = sheet.getRow(rowNum);
 
             if (columnTemplate == null) {
                 columnTemplate = loadColumnTemplate(workbook, sheet, cellLocation);
@@ -50,7 +50,7 @@ public class ColumnSheetGenerator extends AbstractSheetGenerator {
 
                 for (final NormalColumn normalColumn : table.getExpandedColumns()) {
 
-                    final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+                    final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
                     setColumnData(keywordsValueMap, columnTemplate, row, normalColumn, table, order);
                     order++;
                 }
@@ -73,9 +73,9 @@ public class ColumnSheetGenerator extends AbstractSheetGenerator {
     }
 
     @Override
-    public void generate(final ProgressMonitor monitor, final HSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
+    public void generate(final ProgressMonitor monitor, final XSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
         final String name = getSheetName();
-        final HSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
+        final XSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
 
         final String sheetName = workbook.getSheetName(workbook.getSheetIndex(newSheet));
 

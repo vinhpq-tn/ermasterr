@@ -11,8 +11,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.insightech.er.ResourceString;
 import org.insightech.er.editor.model.ERDiagram;
 import org.insightech.er.editor.model.ObjectModel;
@@ -96,7 +97,7 @@ public class ExportToExcelManager extends AbstractExportManager {
 
     private final ExportExcelSetting exportExcelSetting;
 
-    private HSSFWorkbook workbook;
+    private XSSFWorkbook workbook;
 
     private File excelFile;
 
@@ -187,7 +188,7 @@ public class ExportToExcelManager extends AbstractExportManager {
         POIUtils.writeExcelFile(excelFile, workbook);
     }
 
-    private PictureSheetGenerator createPictureSheetGenerator(final ProgressMonitor monitor, final HSSFWorkbook workbook) throws Exception {
+    private PictureSheetGenerator createPictureSheetGenerator(final ProgressMonitor monitor, final XSSFWorkbook workbook) throws Exception {
         final ImageInfoSet imageInfoSet = ExportToImageManager.outputImage(diagram, exportExcelSetting.getCategory(), projectDir, monitor);
 
         final ImageInfo imageInfo = imageInfoSet.getDiagramImageInfo();
@@ -195,21 +196,21 @@ public class ExportToExcelManager extends AbstractExportManager {
         return new PictureSheetGenerator(workbook, imageInfo.getImageData(), imageInfo.getExcelPictureType());
     }
 
-    private HSSFWorkbook loadTemplateWorkbook(final InputStream template, final ERDiagram diagram) throws IOException {
+    private XSSFWorkbook loadTemplateWorkbook(final InputStream template, final ERDiagram diagram) throws IOException {
 
-        final HSSFWorkbook workbook = POIUtils.readExcelBook(template);
+        final XSSFWorkbook workbook = POIUtils.readExcelBook(template);
 
         if (workbook == null) {
             throw new IOException(ResourceString.getResourceString("error.read.file"));
         }
 
-        final HSSFSheet wordsSheet = workbook.getSheet(WORDS_SHEET_NAME);
+        final XSSFSheet wordsSheet = workbook.getSheet(WORDS_SHEET_NAME);
 
         if (wordsSheet == null) {
             throw new IOException(ResourceString.getResourceString("error.not.found.words.sheet"));
         }
 
-        final HSSFSheet loopsSheet = workbook.getSheet(LOOPS_SHEET_NAME);
+        final XSSFSheet loopsSheet = workbook.getSheet(LOOPS_SHEET_NAME);
 
         if (loopsSheet == null) {
             throw new IOException(ResourceString.getResourceString("error.not.found.loops.sheet"));
@@ -227,7 +228,7 @@ public class ExportToExcelManager extends AbstractExportManager {
         return workbook;
     }
 
-    private void initLoopDefinitionMap(final HSSFSheet loopsSheet) {
+    private void initLoopDefinitionMap(final XSSFSheet loopsSheet) {
         for (int i = 2; i <= loopsSheet.getLastRowNum(); i++) {
             final String templateSheetName = POIUtils.getCellValue(loopsSheet, i, 0);
             if (templateSheetName == null) {
@@ -252,14 +253,14 @@ public class ExportToExcelManager extends AbstractExportManager {
         return null;
     }
 
-    private void initSheetNameMap(final HSSFWorkbook workbook) {
+    private void initSheetNameMap(final XSSFWorkbook workbook) {
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             final String sheetName = workbook.getSheetName(i);
             sheetNameMap.put(sheetName.toUpperCase(), 0);
         }
     }
 
-    private void createSheetFromTemplate(final ProgressMonitor monitor, final HSSFWorkbook workbook, final ERDiagram diagram, final boolean useLogicalNameAsSheetName) throws InterruptedException {
+    private void createSheetFromTemplate(final ProgressMonitor monitor, final XSSFWorkbook workbook, final ERDiagram diagram, final boolean useLogicalNameAsSheetName) throws InterruptedException {
         initSheetNameMap(workbook);
 
         int originalSheetNum = workbook.getNumberOfSheets();
@@ -278,7 +279,7 @@ public class ExportToExcelManager extends AbstractExportManager {
             } else {
                 if (!isExcludeTarget(templateSheetName)) {
                     moveSheet(workbook, 0);
-                    final HSSFSheet sheet = workbook.getSheetAt(workbook.getNumberOfSheets() - 1);
+                    final XSSFSheet sheet = workbook.getSheetAt(workbook.getNumberOfSheets() - 1);
 
                     sheetObjectMap.put(templateSheetName, new StringObjectModel(templateSheetName));
 
@@ -316,11 +317,11 @@ public class ExportToExcelManager extends AbstractExportManager {
         }
     }
 
-    public static HSSFSheet moveSheet(final HSSFWorkbook workbook, final int sheetNo) {
-        final HSSFSheet oldSheet = workbook.getSheetAt(sheetNo);
+    public static XSSFSheet moveSheet(final XSSFWorkbook workbook, final int sheetNo) {
+        final XSSFSheet oldSheet = workbook.getSheetAt(sheetNo);
         final String sheetName = oldSheet.getSheetName();
 
-        final HSSFSheet newSheet = workbook.cloneSheet(sheetNo);
+        final XSSFSheet newSheet = workbook.cloneSheet(sheetNo);
         final int newSheetNo = workbook.getSheetIndex(newSheet);
 
         workbook.removeSheetAt(sheetNo);
@@ -330,7 +331,7 @@ public class ExportToExcelManager extends AbstractExportManager {
         return newSheet;
     }
 
-    private int countSheetFromTemplate(final HSSFWorkbook workbook, final ERDiagram diagram) {
+    private int countSheetFromTemplate(final XSSFWorkbook workbook, final ERDiagram diagram) {
         int count = 0;
 
         for (int sheetNo = 0; sheetNo < workbook.getNumberOfSheets(); sheetNo++) {

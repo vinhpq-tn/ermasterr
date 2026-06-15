@@ -2,8 +2,8 @@ package org.insightech.er.editor.model.dbexport.excel.sheet_generator;
 
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.db.DBManager;
 import org.insightech.er.db.DBManagerFactory;
 import org.insightech.er.db.impl.h2.H2DBManager;
@@ -40,7 +40,7 @@ public class SequenceSheetGenerator extends AbstractSheetGenerator {
      * @param sheet
      * @param sequence
      */
-    public void setSequenceData(final HSSFWorkbook workbook, final HSSFSheet sheet, final Sequence sequence, final ERDiagram diagram) {
+    public void setSequenceData(final XSSFWorkbook workbook, final XSSFSheet sheet, final Sequence sequence, final ERDiagram diagram) {
         String cache = Format.toString(sequence.getCache());
 
         if (DBManagerFactory.getDBManager(diagram).isSupported(DBManager.SUPPORT_SEQUENCE_NOCACHE)) {
@@ -72,12 +72,12 @@ public class SequenceSheetGenerator extends AbstractSheetGenerator {
     }
 
     @Override
-    public void generate(final ProgressMonitor monitor, final HSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
+    public void generate(final ProgressMonitor monitor, final XSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
 
         for (final Sequence sequence : diagram.getDiagramContents().getSequenceSet()) {
             final String name = sequence.getName();
 
-            final HSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
+            final XSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
 
             final String sheetName = workbook.getSheetName(workbook.getSheetIndex(newSheet));
             monitor.subTaskWithCounter("[Sequence] " + sheetName);

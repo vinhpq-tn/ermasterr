@@ -11,15 +11,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.common.exception.InputException;
 
 public class POIUtils {
@@ -45,13 +45,13 @@ public class POIUtils {
         }
     }
 
-    public static CellLocation findCell(final HSSFSheet sheet, final String str) {
+    public static CellLocation findCell(final XSSFSheet sheet, final String str) {
         return findCell(sheet, new String[] {str});
     }
 
-    public static CellLocation findCell(final HSSFSheet sheet, final String[] strs) {
+    public static CellLocation findCell(final XSSFSheet sheet, final String[] strs) {
         for (int rowNum = sheet.getFirstRowNum(); rowNum < sheet.getLastRowNum() + 1; rowNum++) {
-            final HSSFRow row = sheet.getRow(rowNum);
+            final XSSFRow row = sheet.getRow(rowNum);
             if (row == null) {
                 continue;
             }
@@ -68,16 +68,16 @@ public class POIUtils {
         return null;
     }
 
-    public static Integer findColumn(final HSSFRow row, final String str) {
+    public static Integer findColumn(final XSSFRow row, final String str) {
         for (int colNum = row.getFirstCellNum(); colNum <= row.getLastCellNum(); colNum++) {
-            final HSSFCell cell = row.getCell(colNum);
+            final XSSFCell cell = row.getCell(colNum);
 
             if (cell == null) {
                 continue;
             }
 
-            if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
-                final HSSFRichTextString cellValue = cell.getRichStringCellValue();
+            if (cell.getCellType() == CellType.STRING) {
+                final XSSFRichTextString cellValue = cell.getRichStringCellValue();
 
                 if (str.equals(cellValue.getString())) {
                     return Integer.valueOf(colNum);
@@ -88,9 +88,9 @@ public class POIUtils {
         return null;
     }
 
-    public static CellLocation findMatchCell(final HSSFSheet sheet, final String regexp) {
+    public static CellLocation findMatchCell(final XSSFSheet sheet, final String regexp) {
         for (int rowNum = sheet.getFirstRowNum(); rowNum < sheet.getLastRowNum() + 1; rowNum++) {
-            final HSSFRow row = sheet.getRow(rowNum);
+            final XSSFRow row = sheet.getRow(rowNum);
             if (row == null) {
                 continue;
             }
@@ -105,19 +105,19 @@ public class POIUtils {
         return null;
     }
 
-    public static Integer findMatchColumn(final HSSFRow row, final String str) {
+    public static Integer findMatchColumn(final XSSFRow row, final String str) {
         for (int colNum = row.getFirstCellNum(); colNum <= row.getLastCellNum(); colNum++) {
-            final HSSFCell cell = row.getCell(colNum);
+            final XSSFCell cell = row.getCell(colNum);
 
             if (cell == null) {
                 continue;
             }
 
-            if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
+            if (cell.getCellType() != CellType.STRING) {
                 continue;
             }
 
-            final HSSFRichTextString cellValue = cell.getRichStringCellValue();
+            final XSSFRichTextString cellValue = cell.getRichStringCellValue();
 
             if (cellValue.getString().matches(str)) {
                 return Integer.valueOf(colNum);
@@ -127,19 +127,19 @@ public class POIUtils {
         return null;
     }
 
-    public static CellLocation findCell(final HSSFSheet sheet, final String str, final int colNum) {
+    public static CellLocation findCell(final XSSFSheet sheet, final String str, final int colNum) {
         for (int rowNum = sheet.getFirstRowNum(); rowNum < sheet.getLastRowNum() + 1; rowNum++) {
-            final HSSFRow row = sheet.getRow(rowNum);
+            final XSSFRow row = sheet.getRow(rowNum);
             if (row == null) {
                 continue;
             }
 
-            final HSSFCell cell = row.getCell(colNum);
+            final XSSFCell cell = row.getCell(colNum);
 
             if (cell == null) {
                 continue;
             }
-            final HSSFRichTextString cellValue = cell.getRichStringCellValue();
+            final XSSFRichTextString cellValue = cell.getRichStringCellValue();
 
             if (!Check.isEmpty(cellValue.getString())) {
                 if (cellValue.getString().equals(str)) {
@@ -151,7 +151,7 @@ public class POIUtils {
         return null;
     }
 
-    public static void replace(final HSSFSheet sheet, final String keyword, final String str) {
+    public static void replace(final XSSFSheet sheet, final String keyword, final String str) {
         final CellLocation location = findCell(sheet, keyword);
 
         if (location == null) {
@@ -161,42 +161,42 @@ public class POIUtils {
         setCellValue(sheet, location, str);
     }
 
-    public static String getCellValue(final HSSFSheet sheet, final CellLocation location) {
-        final HSSFRow row = sheet.getRow(location.r);
-        final HSSFCell cell = row.getCell(location.c);
+    public static String getCellValue(final XSSFSheet sheet, final CellLocation location) {
+        final XSSFRow row = sheet.getRow(location.r);
+        final XSSFCell cell = row.getCell(location.c);
 
-        final HSSFRichTextString cellValue = cell.getRichStringCellValue();
+        final XSSFRichTextString cellValue = cell.getRichStringCellValue();
 
         return cellValue.toString();
     }
 
-    public static String getCellValue(final HSSFSheet sheet, final int r, final int c) {
-        final HSSFRow row = sheet.getRow(r);
+    public static String getCellValue(final XSSFSheet sheet, final int r, final int c) {
+        final XSSFRow row = sheet.getRow(r);
 
         if (row == null) {
             return null;
         }
 
-        final HSSFCell cell = row.getCell(c);
+        final XSSFCell cell = row.getCell(c);
 
         if (cell == null) {
             return null;
         }
 
-        final HSSFRichTextString cellValue = cell.getRichStringCellValue();
+        final XSSFRichTextString cellValue = cell.getRichStringCellValue();
 
         return cellValue.toString();
     }
 
-    public static int getIntCellValue(final HSSFSheet sheet, final int r, final int c) {
-        final HSSFRow row = sheet.getRow(r);
+    public static int getIntCellValue(final XSSFSheet sheet, final int r, final int c) {
+        final XSSFRow row = sheet.getRow(r);
         if (row == null) {
             return 0;
         }
-        final HSSFCell cell = row.getCell(c);
+        final XSSFCell cell = row.getCell(c);
 
         try {
-            if (cell.getCellType() != Cell.CELL_TYPE_NUMERIC) {
+            if (cell.getCellType() != CellType.NUMERIC) {
                 return 0;
             }
         } catch (final RuntimeException e) {
@@ -207,14 +207,14 @@ public class POIUtils {
         return (int) cell.getNumericCellValue();
     }
 
-    public static boolean getBooleanCellValue(final HSSFSheet sheet, final int r, final int c) {
-        final HSSFRow row = sheet.getRow(r);
+    public static boolean getBooleanCellValue(final XSSFSheet sheet, final int r, final int c) {
+        final XSSFRow row = sheet.getRow(r);
 
         if (row == null) {
             return false;
         }
 
-        final HSSFCell cell = row.getCell(c);
+        final XSSFCell cell = row.getCell(c);
 
         if (cell == null) {
             return false;
@@ -228,25 +228,25 @@ public class POIUtils {
         }
     }
 
-    public static short getCellColor(final HSSFSheet sheet, final int r, final int c) {
-        final HSSFRow row = sheet.getRow(r);
+    public static short getCellColor(final XSSFSheet sheet, final int r, final int c) {
+        final XSSFRow row = sheet.getRow(r);
         if (row == null) {
             return -1;
         }
-        final HSSFCell cell = row.getCell(c);
+        final XSSFCell cell = row.getCell(c);
 
         return cell.getCellStyle().getFillForegroundColor();
     }
 
-    public static void setCellValue(final HSSFSheet sheet, final CellLocation location, final String value) {
-        final HSSFRow row = sheet.getRow(location.r);
-        final HSSFCell cell = row.getCell(location.c);
+    public static void setCellValue(final XSSFSheet sheet, final CellLocation location, final String value) {
+        final XSSFRow row = sheet.getRow(location.r);
+        final XSSFCell cell = row.getCell(location.c);
 
-        final HSSFRichTextString text = new HSSFRichTextString(value);
+        final XSSFRichTextString text = new XSSFRichTextString(value);
         cell.setCellValue(text);
     }
 
-    public static HSSFWorkbook readExcelBook(final File excelFile) throws IOException {
+    public static XSSFWorkbook readExcelBook(final File excelFile) throws IOException {
         FileInputStream fis = null;
 
         try {
@@ -261,11 +261,11 @@ public class POIUtils {
         }
     }
 
-    public static HSSFWorkbook readExcelBook(final InputStream stream) throws IOException {
+    public static XSSFWorkbook readExcelBook(final InputStream stream) throws IOException {
         BufferedInputStream bis = null;
         try {
             bis = new BufferedInputStream(stream);
-            return new HSSFWorkbook(bis);
+            return new XSSFWorkbook(bis);
 
         } finally {
             if (bis != null) {
@@ -274,7 +274,7 @@ public class POIUtils {
         }
     }
 
-    public static void writeExcelFile(final File excelFile, final HSSFWorkbook workbook) throws Exception {
+    public static void writeExcelFile(final File excelFile, final XSSFWorkbook workbook) throws Exception {
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
 
@@ -296,7 +296,7 @@ public class POIUtils {
         }
     }
 
-    public static CellRangeAddress getMergedRegion(final HSSFSheet sheet, final CellLocation location) {
+    public static CellRangeAddress getMergedRegion(final XSSFSheet sheet, final CellLocation location) {
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
             final CellRangeAddress region = sheet.getMergedRegion(i);
 
@@ -315,7 +315,7 @@ public class POIUtils {
         return null;
     }
 
-    public static List<CellRangeAddress> getMergedRegionList(final HSSFSheet sheet, final int rowNum) {
+    public static List<CellRangeAddress> getMergedRegionList(final XSSFSheet sheet, final int rowNum) {
         final List<CellRangeAddress> regionList = new ArrayList<CellRangeAddress>();
 
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
@@ -332,8 +332,8 @@ public class POIUtils {
         return regionList;
     }
 
-    public static void copyRow(final HSSFSheet oldSheet, final HSSFSheet newSheet, final int oldStartRowNum, final int oldEndRowNum, final int newStartRowNum) {
-        final HSSFRow oldAboveRow = oldSheet.getRow(oldStartRowNum - 1);
+    public static void copyRow(final XSSFSheet oldSheet, final XSSFSheet newSheet, final int oldStartRowNum, final int oldEndRowNum, final int newStartRowNum) {
+        final XSSFRow oldAboveRow = oldSheet.getRow(oldStartRowNum - 1);
 
         int newRowNum = newStartRowNum;
 
@@ -341,23 +341,23 @@ public class POIUtils {
             POIUtils.copyRow(oldSheet, newSheet, oldRowNum, newRowNum++);
         }
 
-        final HSSFRow newTopRow = newSheet.getRow(newStartRowNum);
+        final XSSFRow newTopRow = newSheet.getRow(newStartRowNum);
 
         if (oldAboveRow != null) {
             for (int colNum = newTopRow.getFirstCellNum(); colNum <= newTopRow.getLastCellNum(); colNum++) {
-                final HSSFCell oldAboveCell = oldAboveRow.getCell(colNum);
+                final XSSFCell oldAboveCell = oldAboveRow.getCell(colNum);
                 if (oldAboveCell != null) {
-                    final HSSFCell newTopCell = newTopRow.getCell(colNum);
+                    final XSSFCell newTopCell = newTopRow.getCell(colNum);
                     newTopCell.getCellStyle().setBorderTop(oldAboveCell.getCellStyle().getBorderBottom());
                 }
             }
         }
     }
 
-    public static void copyRow(final HSSFSheet oldSheet, final HSSFSheet newSheet, final int oldRowNum, final int newRowNum) {
-        final HSSFRow oldRow = oldSheet.getRow(oldRowNum);
+    public static void copyRow(final XSSFSheet oldSheet, final XSSFSheet newSheet, final int oldRowNum, final int newRowNum) {
+        final XSSFRow oldRow = oldSheet.getRow(oldRowNum);
 
-        final HSSFRow newRow = newSheet.createRow(newRowNum);
+        final XSSFRow newRow = newSheet.createRow(newRowNum);
 
         if (oldRow == null) {
             return;
@@ -370,26 +370,26 @@ public class POIUtils {
         }
 
         for (int colNum = oldRow.getFirstCellNum(); colNum <= oldRow.getLastCellNum(); colNum++) {
-            final HSSFCell oldCell = oldRow.getCell(colNum);
-            final HSSFCell newCell = newRow.createCell(colNum);
+            final XSSFCell oldCell = oldRow.getCell(colNum);
+            final XSSFCell newCell = newRow.createCell(colNum);
 
             if (oldCell != null) {
-                final HSSFCellStyle style = oldCell.getCellStyle();
+                final XSSFCellStyle style = oldCell.getCellStyle();
                 newCell.setCellStyle(style);
 
-                final int cellType = oldCell.getCellType();
+                final CellType cellType = oldCell.getCellType();
                 newCell.setCellType(cellType);
 
-                if (cellType == Cell.CELL_TYPE_BOOLEAN) {
+                if (cellType == CellType.BOOLEAN) {
                     newCell.setCellValue(oldCell.getBooleanCellValue());
 
-                } else if (cellType == Cell.CELL_TYPE_FORMULA) {
+                } else if (cellType == CellType.FORMULA) {
                     newCell.setCellFormula(oldCell.getCellFormula());
 
-                } else if (cellType == Cell.CELL_TYPE_NUMERIC) {
+                } else if (cellType == CellType.NUMERIC) {
                     newCell.setCellValue(oldCell.getNumericCellValue());
 
-                } else if (cellType == Cell.CELL_TYPE_STRING) {
+                } else if (cellType == CellType.STRING) {
                     newCell.setCellValue(oldCell.getRichStringCellValue());
                 }
             }
@@ -398,22 +398,22 @@ public class POIUtils {
         POIUtils.copyMergedRegion(newSheet, getMergedRegionList(oldSheet, oldRowNum), newRowNum);
     }
 
-    public static void copyMergedRegion(final HSSFSheet sheet, final List<CellRangeAddress> regionList, final int rowNum) {
+    public static void copyMergedRegion(final XSSFSheet sheet, final List<CellRangeAddress> regionList, final int rowNum) {
         for (final CellRangeAddress region : regionList) {
             final CellRangeAddress address = new CellRangeAddress(rowNum, rowNum, region.getFirstColumn(), region.getLastColumn());
             sheet.addMergedRegion(address);
         }
     }
 
-    public static List<HSSFCellStyle> copyCellStyle(final HSSFWorkbook workbook, final HSSFRow row) {
-        final List<HSSFCellStyle> cellStyleList = new ArrayList<HSSFCellStyle>();
+    public static List<XSSFCellStyle> copyCellStyle(final XSSFWorkbook workbook, final XSSFRow row) {
+        final List<XSSFCellStyle> cellStyleList = new ArrayList<XSSFCellStyle>();
 
         for (int colNum = row.getFirstCellNum(); colNum <= row.getLastCellNum(); colNum++) {
 
-            final HSSFCell cell = row.getCell(colNum);
+            final XSSFCell cell = row.getCell(colNum);
             if (cell != null) {
-                final HSSFCellStyle style = cell.getCellStyle();
-                final HSSFCellStyle newCellStyle = copyCellStyle(workbook, style);
+                final XSSFCellStyle style = cell.getCellStyle();
+                final XSSFCellStyle newCellStyle = copyCellStyle(workbook, style);
                 cellStyleList.add(newCellStyle);
             } else {
                 cellStyleList.add(null);
@@ -423,9 +423,9 @@ public class POIUtils {
         return cellStyleList;
     }
 
-    public static HSSFCellStyle copyCellStyle(final HSSFWorkbook workbook, final HSSFCellStyle style) {
+    public static XSSFCellStyle copyCellStyle(final XSSFWorkbook workbook, final XSSFCellStyle style) {
 
-        final HSSFCellStyle newCellStyle = workbook.createCellStyle();
+        final XSSFCellStyle newCellStyle = workbook.createCellStyle();
 
         newCellStyle.setAlignment(style.getAlignment());
         newCellStyle.setBorderBottom(style.getBorderBottom());
@@ -447,15 +447,15 @@ public class POIUtils {
         newCellStyle.setVerticalAlignment(style.getVerticalAlignment());
         newCellStyle.setWrapText(style.getWrapText());
 
-        final HSSFFont font = workbook.getFontAt(style.getFontIndex());
+        final XSSFFont font = workbook.getFontAt(style.getFontIndex());
         newCellStyle.setFont(font);
 
         return newCellStyle;
     }
 
-    public static HSSFFont copyFont(final HSSFWorkbook workbook, final HSSFFont font) {
+    public static XSSFFont copyFont(final XSSFWorkbook workbook, final XSSFFont font) {
 
-        final HSSFFont newFont = workbook.createFont();
+        final XSSFFont newFont = workbook.createFont();
 
         // newFont.setBoldweight(font.getBoldweight());
         // newFont.setCharSet(font.getCharSet());
@@ -471,7 +471,7 @@ public class POIUtils {
         return newFont;
     }
 
-    public static HSSFRow insertRow(final HSSFSheet sheet, final int rowNum) {
+    public static XSSFRow insertRow(final XSSFSheet sheet, final int rowNum) {
         sheet.shiftRows(rowNum + 1, sheet.getLastRowNum(), 1);
 
         return sheet.getRow(rowNum);

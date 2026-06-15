@@ -24,11 +24,11 @@ import org.insightech.er.util.io.IOUtils;
 
 public class TemplatePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-    private static final String DEFAULT_TEMPLATE_FILE_EN = "template_en.xls";
+    private static final String DEFAULT_TEMPLATE_FILE_EN = "template_en.xlsx";
 
-    private static final String DEFAULT_TEMPLATE_FILE_ZH = "template_zh.xls";
+    private static final String DEFAULT_TEMPLATE_FILE_ZH = "template_zh.xlsx";
 
-    private static final String DEFAULT_TEMPLATE_FILE_JA = "template_ja.xls";
+    private static final String DEFAULT_TEMPLATE_FILE_JA = "template_ja.xlsx";
 
     private TemplateFileListEditor fileListEditor;
 

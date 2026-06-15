@@ -2,8 +2,8 @@ package org.insightech.er.editor.model.dbexport.excel.sheet_generator;
 
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.editor.model.ERDiagram;
 import org.insightech.er.editor.model.ObjectModel;
 import org.insightech.er.editor.model.dbexport.excel.ExportToExcelManager.LoopDefinition;
@@ -19,7 +19,7 @@ public class TriggerSheetGenerator extends AbstractSheetGenerator {
 
     private static final String KEYWORD_TRIGGER_SQL = "$SQL";
 
-    public void setTriggerData(final HSSFWorkbook workbook, final HSSFSheet sheet, final Trigger trigger) {
+    public void setTriggerData(final XSSFWorkbook workbook, final XSSFSheet sheet, final Trigger trigger) {
         POIUtils.replace(sheet, KEYWORD_TRIGGER_NAME, getValue(keywordsValueMap, KEYWORD_TRIGGER_NAME, trigger.getName()));
 
         POIUtils.replace(sheet, KEYWORD_TRIGGER_DESCRIPTION, getValue(keywordsValueMap, KEYWORD_TRIGGER_DESCRIPTION, trigger.getDescription()));
@@ -28,11 +28,11 @@ public class TriggerSheetGenerator extends AbstractSheetGenerator {
     }
 
     @Override
-    public void generate(final ProgressMonitor monitor, final HSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
+    public void generate(final ProgressMonitor monitor, final XSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
 
         for (final Trigger trigger : diagram.getDiagramContents().getTriggerSet()) {
             final String name = trigger.getName();
-            final HSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
+            final XSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
 
             final String sheetName = workbook.getSheetName(workbook.getSheetIndex(newSheet));
             monitor.subTaskWithCounter("[Trigger] " + sheetName);

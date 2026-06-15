@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.editor.model.ERDiagram;
 import org.insightech.er.editor.model.ObjectModel;
 import org.insightech.er.editor.model.dbexport.excel.ExportToExcelManager.LoopDefinition;
@@ -86,36 +86,36 @@ public abstract class AbstractSheetGenerator {
     public static class ColumnTemplate {
         public Map<Integer, String> columnTemplateMap = new HashMap<Integer, String>();
 
-        public List<HSSFCellStyle> topRowCellStyleList;
+        public List<XSSFCellStyle> topRowCellStyleList;
 
-        public List<HSSFCellStyle> middleRowCellStyleList;
+        public List<XSSFCellStyle> middleRowCellStyleList;
 
-        public List<HSSFCellStyle> bottomRowCellStyleList;
+        public List<XSSFCellStyle> bottomRowCellStyleList;
     }
 
     public static class MatrixCellStyle {
-        public HSSFCellStyle headerTemplateCellStyle;
+        public XSSFCellStyle headerTemplateCellStyle;
 
-        public HSSFCellStyle style11;
-        public HSSFCellStyle style12;
-        public HSSFCellStyle style13;
-        public HSSFCellStyle style21;
-        public HSSFCellStyle style22;
-        public HSSFCellStyle style23;
-        public HSSFCellStyle style31;
-        public HSSFCellStyle style32;
-        public HSSFCellStyle style33;
+        public XSSFCellStyle style11;
+        public XSSFCellStyle style12;
+        public XSSFCellStyle style13;
+        public XSSFCellStyle style21;
+        public XSSFCellStyle style22;
+        public XSSFCellStyle style23;
+        public XSSFCellStyle style31;
+        public XSSFCellStyle style32;
+        public XSSFCellStyle style33;
     }
 
-    protected Map<String, String> buildKeywordsValueMap(final HSSFSheet wordsSheet, final int columnNo, final String[] keywords) {
+    protected Map<String, String> buildKeywordsValueMap(final XSSFSheet wordsSheet, final int columnNo, final String[] keywords) {
         final Map<String, String> keywordsValueMap = new HashMap<String, String>();
 
         for (final String keyword : keywords) {
             final CellLocation location = POIUtils.findCell(wordsSheet, keyword, columnNo);
             if (location != null) {
-                final HSSFRow row = wordsSheet.getRow(location.r);
+                final XSSFRow row = wordsSheet.getRow(location.r);
 
-                final HSSFCell cell = row.getCell(location.c + 2);
+                final XSSFCell cell = row.getCell(location.c + 2);
                 final String value = cell.getRichStringCellValue().getString();
 
                 if (value != null) {
@@ -147,10 +147,10 @@ public abstract class AbstractSheetGenerator {
         return obj.toString();
     }
 
-    protected void setColumnData(final Map<String, String> keywordsValueMap, final ColumnTemplate columnTemplate, final HSSFRow row, final NormalColumn normalColumn, final TableView tableView, final int order) {
+    protected void setColumnData(final Map<String, String> keywordsValueMap, final ColumnTemplate columnTemplate, final XSSFRow row, final NormalColumn normalColumn, final TableView tableView, final int order) {
 
         for (final int columnNum : columnTemplate.columnTemplateMap.keySet()) {
-            final HSSFCell cell = row.createCell(columnNum);
+            final XSSFCell cell = row.createCell(columnNum);
             final String template = columnTemplate.columnTemplateMap.get(columnNum);
 
             String value = null;
@@ -166,7 +166,7 @@ public abstract class AbstractSheetGenerator {
                 cell.setCellValue(num);
 
             } catch (final NumberFormatException e) {
-                final HSSFRichTextString text = new HSSFRichTextString(value);
+                final XSSFRichTextString text = new XSSFRichTextString(value);
                 cell.setCellValue(text);
             }
         }
@@ -326,19 +326,19 @@ public abstract class AbstractSheetGenerator {
         return getValue(keywordsValueMap, keyword, obj);
     }
 
-    protected ColumnTemplate loadColumnTemplate(final HSSFWorkbook workbook, final HSSFSheet templateSheet, final CellLocation location) {
+    protected ColumnTemplate loadColumnTemplate(final XSSFWorkbook workbook, final XSSFSheet templateSheet, final CellLocation location) {
         if (location == null) {
             return null;
         }
 
         final ColumnTemplate columnTemplate = new ColumnTemplate();
 
-        final HSSFRow row = templateSheet.getRow(location.r);
-        final HSSFRow bottomRow = templateSheet.getRow(location.r + 1);
+        final XSSFRow row = templateSheet.getRow(location.r);
+        final XSSFRow bottomRow = templateSheet.getRow(location.r + 1);
 
         for (int colNum = row.getFirstCellNum(); colNum <= row.getLastCellNum(); colNum++) {
 
-            final HSSFCell cell = row.getCell(colNum);
+            final XSSFCell cell = row.getCell(colNum);
 
             if (cell != null) {
                 columnTemplate.columnTemplateMap.put(colNum, cell.getRichStringCellValue().getString());
@@ -350,12 +350,12 @@ public abstract class AbstractSheetGenerator {
         columnTemplate.bottomRowCellStyleList = POIUtils.copyCellStyle(workbook, row);
 
         for (short i = 0; i < columnTemplate.middleRowCellStyleList.size(); i++) {
-            final HSSFCellStyle middleRowCellStyle = columnTemplate.middleRowCellStyleList.get(i);
+            final XSSFCellStyle middleRowCellStyle = columnTemplate.middleRowCellStyleList.get(i);
             if (middleRowCellStyle != null) {
-                final HSSFCellStyle topRowCellStyle = columnTemplate.topRowCellStyleList.get(i);
-                final HSSFCellStyle bottomRowCellStyle = columnTemplate.bottomRowCellStyleList.get(i);
+                final XSSFCellStyle topRowCellStyle = columnTemplate.topRowCellStyleList.get(i);
+                final XSSFCellStyle bottomRowCellStyle = columnTemplate.bottomRowCellStyleList.get(i);
 
-                final HSSFCell bottomCell = bottomRow.getCell(row.getFirstCellNum() + i);
+                final XSSFCell bottomCell = bottomRow.getCell(row.getFirstCellNum() + i);
 
                 topRowCellStyle.setBorderBottom(bottomCell.getCellStyle().getBorderTop());
                 middleRowCellStyle.setBorderTop(bottomCell.getCellStyle().getBorderTop());
@@ -368,18 +368,18 @@ public abstract class AbstractSheetGenerator {
         return columnTemplate;
     }
 
-    protected void setCellStyle(final ColumnTemplate columnTemplate, final HSSFSheet sheet, final int firstRowNum, final int rowSize, final int firstColNum) {
+    protected void setCellStyle(final ColumnTemplate columnTemplate, final XSSFSheet sheet, final int firstRowNum, final int rowSize, final int firstColNum) {
 
         sheet.removeRow(sheet.getRow(firstRowNum + rowSize));
 
-        final HSSFRow bottomRowTemplate = sheet.getRow(firstRowNum + rowSize + 1);
+        final XSSFRow bottomRowTemplate = sheet.getRow(firstRowNum + rowSize + 1);
         sheet.removeRow(bottomRowTemplate);
 
         for (int r = firstRowNum + 1; r < firstRowNum + rowSize; r++) {
-            final HSSFRow row = sheet.getRow(r);
+            final XSSFRow row = sheet.getRow(r);
 
             for (int i = 0; i < columnTemplate.middleRowCellStyleList.size(); i++) {
-                final HSSFCell cell = row.getCell(firstColNum + i);
+                final XSSFCell cell = row.getCell(firstColNum + i);
                 if (cell != null && columnTemplate.middleRowCellStyleList.get(i) != null) {
                     cell.setCellStyle(columnTemplate.middleRowCellStyleList.get(i));
                 }
@@ -387,10 +387,10 @@ public abstract class AbstractSheetGenerator {
         }
 
         if (rowSize > 0) {
-            final HSSFRow topRow = sheet.getRow(firstRowNum);
+            final XSSFRow topRow = sheet.getRow(firstRowNum);
 
             for (int i = 0; i < columnTemplate.topRowCellStyleList.size(); i++) {
-                final HSSFCell cell = topRow.getCell(firstColNum + i);
+                final XSSFCell cell = topRow.getCell(firstColNum + i);
                 if (cell != null) {
                     if (columnTemplate.topRowCellStyleList.get(i) != null) {
                         cell.setCellStyle(columnTemplate.topRowCellStyleList.get(i));
@@ -398,10 +398,10 @@ public abstract class AbstractSheetGenerator {
                 }
             }
 
-            final HSSFRow bottomRow = sheet.getRow(firstRowNum + rowSize - 1);
+            final XSSFRow bottomRow = sheet.getRow(firstRowNum + rowSize - 1);
 
             for (int i = 0; i < columnTemplate.bottomRowCellStyleList.size(); i++) {
-                final HSSFCell bottomRowCell = bottomRow.getCell(firstColNum + i);
+                final XSSFCell bottomRowCell = bottomRow.getCell(firstColNum + i);
                 if (bottomRowCell != null) {
                     if (columnTemplate.bottomRowCellStyleList.get(i) != null) {
                         bottomRowCell.setCellStyle(columnTemplate.bottomRowCellStyleList.get(i));
@@ -410,14 +410,14 @@ public abstract class AbstractSheetGenerator {
             }
 
         } else {
-            final HSSFRow bottomRow = sheet.getRow(firstRowNum - 1);
+            final XSSFRow bottomRow = sheet.getRow(firstRowNum - 1);
 
             if (bottomRow != null) {
                 for (int i = 0; i < columnTemplate.bottomRowCellStyleList.size(); i++) {
-                    final HSSFCell bottomRowCell = bottomRow.getCell(firstColNum + i);
+                    final XSSFCell bottomRowCell = bottomRow.getCell(firstColNum + i);
 
                     if (bottomRowCell != null) {
-                        final HSSFCellStyle bottomRowCellStyle = bottomRowCell.getCellStyle();
+                        final XSSFCellStyle bottomRowCellStyle = bottomRowCell.getCellStyle();
                         if (columnTemplate.bottomRowCellStyleList.get(i) != null) {
                             bottomRowCellStyle.setBorderBottom(columnTemplate.bottomRowCellStyleList.get(i).getBorderBottom());
                         }
@@ -433,8 +433,8 @@ public abstract class AbstractSheetGenerator {
         }
     }
 
-    public static HSSFSheet createNewSheet(final HSSFWorkbook workbook, final int sheetNo, final String name, final Map<String, Integer> sheetNameMap) {
-        final HSSFSheet sheet = workbook.cloneSheet(sheetNo);
+    public static XSSFSheet createNewSheet(final XSSFWorkbook workbook, final int sheetNo, final String name, final Map<String, Integer> sheetNameMap) {
+        final XSSFSheet sheet = workbook.cloneSheet(sheetNo);
         final int newSheetNo = workbook.getSheetIndex(sheet);
 
         workbook.setSheetName(newSheetNo, decideSheetName(name, sheetNameMap));
@@ -466,11 +466,11 @@ public abstract class AbstractSheetGenerator {
         return sheetName;
     }
 
-    public void init(final HSSFSheet wordsSheet) {
+    public void init(final XSSFSheet wordsSheet) {
         keywordsValueMap = buildKeywordsValueMap(wordsSheet, getKeywordsColumnNo(), getKeywords());
     }
 
-    public abstract void generate(ProgressMonitor monitor, HSSFWorkbook workbook, int sheetNo, boolean useLogicalNameAsSheetName, Map<String, Integer> sheetNameMap, Map<String, ObjectModel> sheetObjectMap, ERDiagram diagram, Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException;
+    public abstract void generate(ProgressMonitor monitor, XSSFWorkbook workbook, int sheetNo, boolean useLogicalNameAsSheetName, Map<String, Integer> sheetNameMap, Map<String, ObjectModel> sheetObjectMap, ERDiagram diagram, Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException;
 
     public abstract int count(ERDiagram diagram);
 

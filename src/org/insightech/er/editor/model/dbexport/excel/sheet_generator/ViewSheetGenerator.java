@@ -3,9 +3,9 @@ package org.insightech.er.editor.model.dbexport.excel.sheet_generator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.insightech.er.editor.model.ERDiagram;
 import org.insightech.er.editor.model.ObjectModel;
 import org.insightech.er.editor.model.dbexport.excel.ExportToExcelManager.LoopDefinition;
@@ -37,7 +37,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
     }
 
     @Override
-    public void generate(final ProgressMonitor monitor, final HSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
+    public void generate(final ProgressMonitor monitor, final XSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
         clear();
 
         List<View> nodeSet = null;
@@ -56,7 +56,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
                 name = view.getPhysicalName();
             }
 
-            final HSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
+            final XSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
 
             final String sheetName = workbook.getSheetName(workbook.getSheetIndex(newSheet));
             monitor.subTaskWithCounter("[View] " + sheetName);
@@ -76,7 +76,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
      * @param sheet
      * @param view
      */
-    public void setViewData(final HSSFWorkbook workbook, final HSSFSheet sheet, final View view) {
+    public void setViewData(final XSSFWorkbook workbook, final XSSFSheet sheet, final View view) {
         POIUtils.replace(sheet, KEYWORD_LOGICAL_VIEW_NAME, getValue(keywordsValueMap, KEYWORD_LOGICAL_VIEW_NAME, view.getLogicalName()));
 
         POIUtils.replace(sheet, KEYWORD_PHYSICAL_VIEW_NAME, getValue(keywordsValueMap, KEYWORD_PHYSICAL_VIEW_NAME, view.getPhysicalName()));
@@ -89,7 +89,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
 
         if (cellLocation != null) {
             int rowNum = cellLocation.r;
-            final HSSFRow templateRow = sheet.getRow(rowNum);
+            final XSSFRow templateRow = sheet.getRow(rowNum);
 
             if (columnTemplate == null) {
                 columnTemplate = loadColumnTemplate(workbook, sheet, cellLocation);
@@ -98,7 +98,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
             int order = 1;
 
             for (final NormalColumn normalColumn : view.getExpandedColumns()) {
-                final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+                final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
                 setColumnData(keywordsValueMap, columnTemplate, row, normalColumn, view, order);
                 order++;
             }
@@ -110,7 +110,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
 
         if (fkCellLocation != null) {
             int rowNum = fkCellLocation.r;
-            final HSSFRow templateRow = sheet.getRow(rowNum);
+            final XSSFRow templateRow = sheet.getRow(rowNum);
 
             if (fkColumnTemplate == null) {
                 fkColumnTemplate = loadColumnTemplate(workbook, sheet, fkCellLocation);
@@ -120,7 +120,7 @@ public class ViewSheetGenerator extends AbstractSheetGenerator {
 
             for (final NormalColumn normalColumn : view.getExpandedColumns()) {
                 if (normalColumn.isForeignKey()) {
-                    final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+                    final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
                     setColumnData(keywordsValueMap, fkColumnTemplate, row, normalColumn, view, order);
                     order++;
                 }
