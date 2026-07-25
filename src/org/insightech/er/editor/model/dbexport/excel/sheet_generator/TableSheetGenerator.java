@@ -3,16 +3,15 @@ package org.insightech.er.editor.model.dbexport.excel.sheet_generator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.insightech.er.editor.model.ERDiagram;
 import org.insightech.er.editor.model.ObjectModel;
 import org.insightech.er.editor.model.dbexport.excel.ExportToExcelManager.LoopDefinition;
@@ -64,7 +63,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
      * {@inheritDoc}
      */
     @Override
-    public void generate(final ProgressMonitor monitor, final XSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
+    public void generate(final ProgressMonitor monitor, final HSSFWorkbook workbook, final int sheetNo, final boolean useLogicalNameAsSheetName, final Map<String, Integer> sheetNameMap, final Map<String, ObjectModel> sheetObjectMap, final ERDiagram diagram, final Map<String, LoopDefinition> loopDefinitionMap) throws InterruptedException {
         clear();
 
         List<ERTable> nodeSet = null;
@@ -83,7 +82,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
                 name = table.getPhysicalName();
             }
 
-            final XSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
+            final HSSFSheet newSheet = createNewSheet(workbook, sheetNo, name, sheetNameMap);
 
             final String sheetName = workbook.getSheetName(workbook.getSheetIndex(newSheet));
             monitor.subTaskWithCounter("[Table] " + sheetName);
@@ -96,7 +95,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         }
     }
 
-    public void setTableData(final XSSFWorkbook workbook, final XSSFSheet sheet, final ERTable table) {
+    public void setTableData(final HSSFWorkbook workbook, final HSSFSheet sheet, final ERTable table) {
         POIUtils.replace(sheet, KEYWORD_LOGICAL_TABLE_NAME, getValue(keywordsValueMap, KEYWORD_LOGICAL_TABLE_NAME, table.getLogicalName()));
 
         POIUtils.replace(sheet, KEYWORD_PHYSICAL_TABLE_NAME, getValue(keywordsValueMap, KEYWORD_PHYSICAL_TABLE_NAME, table.getPhysicalName()));
@@ -109,7 +108,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
 
         if (cellLocation != null) {
             int rowNum = cellLocation.r;
-            final XSSFRow templateRow = sheet.getRow(rowNum);
+            final HSSFRow templateRow = sheet.getRow(rowNum);
 
             if (columnTemplate == null) {
                 columnTemplate = loadColumnTemplate(workbook, sheet, cellLocation);
@@ -118,7 +117,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
             int order = 1;
 
             for (final NormalColumn normalColumn : table.getExpandedColumns()) {
-                final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+                final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
                 setColumnData(keywordsValueMap, columnTemplate, row, normalColumn, table, order);
                 order++;
             }
@@ -130,7 +129,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
 
         if (fkCellLocation != null) {
             int rowNum = fkCellLocation.r;
-            final XSSFRow templateRow = sheet.getRow(rowNum);
+            final HSSFRow templateRow = sheet.getRow(rowNum);
 
             if (fkColumnTemplate == null) {
                 fkColumnTemplate = loadColumnTemplate(workbook, sheet, fkCellLocation);
@@ -140,7 +139,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
 
             for (final NormalColumn normalColumn : table.getExpandedColumns()) {
                 if (normalColumn.isForeignKey()) {
-                    final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+                    final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
                     setColumnData(keywordsValueMap, fkColumnTemplate, row, normalColumn, table, order);
                     order++;
                 }
@@ -153,7 +152,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         this.setComplexUniqueKeyMatrix(workbook, sheet, table);
     }
 
-    private void setIndexMatrix(final XSSFWorkbook workbook, final XSSFSheet sheet, final ERTable table) {
+    private void setIndexMatrix(final HSSFWorkbook workbook, final HSSFSheet sheet, final ERTable table) {
         final CellLocation logicalIndexCellLocation = POIUtils.findCell(sheet, KEYWORD_LOGICAL_INDEX_MATRIX);
 
         if (logicalIndexCellLocation != null) {
@@ -173,7 +172,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         }
     }
 
-    private void setComplexUniqueKeyMatrix(final XSSFWorkbook workbook, final XSSFSheet sheet, final ERTable table) {
+    private void setComplexUniqueKeyMatrix(final HSSFWorkbook workbook, final HSSFSheet sheet, final ERTable table) {
         final CellLocation logicalCellLocation = POIUtils.findCell(sheet, KEYWORD_LOGICAL_COMPLEX_UNIQUE_KEY_MATRIX);
 
         if (logicalCellLocation != null) {
@@ -194,20 +193,19 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         }
     }
 
-    private void setIndexMatrixColor(final XSSFWorkbook workbook, final XSSFCellStyle indexStyle) {
-        indexStyle.setFillForegroundColor(IndexedColors.WHITE.index);
-        final XSSFFont font = workbook.getFontAt(indexStyle.getFontIndex());
-        XSSFColor xssfColor = new XSSFColor(new byte[] {0, 0, 0});
-        font.setColor(xssfColor);
+    private void setIndexMatrixColor(final HSSFWorkbook workbook, final HSSFCellStyle indexStyle) {
+        indexStyle.setFillForegroundColor(HSSFColor.WHITE.index);
+        final HSSFFont font = workbook.getFontAt(indexStyle.getFontIndex());
+        font.setColor(HSSFColor.BLACK.index);
     }
 
-    private MatrixCellStyle createMatrixCellStyle(final XSSFWorkbook workbook, final XSSFSheet sheet, final CellLocation matrixCellLocation) {
+    private MatrixCellStyle createMatrixCellStyle(final HSSFWorkbook workbook, final HSSFSheet sheet, final CellLocation matrixCellLocation) {
 
         final int matrixRowNum = matrixCellLocation.r;
         final int matrixColumnNum = matrixCellLocation.c;
 
-        final XSSFRow matrixHeaderTemplateRow = sheet.getRow(matrixRowNum);
-        final XSSFCell matrixHeaderTemplateCell = matrixHeaderTemplateRow.getCell(matrixColumnNum);
+        final HSSFRow matrixHeaderTemplateRow = sheet.getRow(matrixRowNum);
+        final HSSFCell matrixHeaderTemplateCell = matrixHeaderTemplateRow.getCell(matrixColumnNum);
 
         final MatrixCellStyle matrixCellStyle = new MatrixCellStyle();
 
@@ -238,41 +236,41 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         return matrixCellStyle;
     }
 
-    private XSSFCellStyle createMatrixCellStyle(final XSSFWorkbook workbook, final XSSFCellStyle matrixHeaderTemplateCellStyle, final boolean top, final boolean right, final boolean bottom, final boolean left) {
-        final XSSFCellStyle cellStyle = POIUtils.copyCellStyle(workbook, matrixHeaderTemplateCellStyle);
+    private HSSFCellStyle createMatrixCellStyle(final HSSFWorkbook workbook, final HSSFCellStyle matrixHeaderTemplateCellStyle, final boolean top, final boolean right, final boolean bottom, final boolean left) {
+        final HSSFCellStyle cellStyle = POIUtils.copyCellStyle(workbook, matrixHeaderTemplateCellStyle);
 
         if (top) {
-            cellStyle.setBorderTop(BorderStyle.THIN);
+            cellStyle.setBorderTop(CellStyle.BORDER_THIN);
         }
         if (right) {
-            cellStyle.setBorderRight(BorderStyle.THIN);
+            cellStyle.setBorderRight(CellStyle.BORDER_THIN);
         }
         if (bottom) {
-            cellStyle.setBorderBottom(BorderStyle.THIN);
+            cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
         }
         if (left) {
-            cellStyle.setBorderLeft(BorderStyle.THIN);
+            cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
         }
 
         return cellStyle;
     }
 
-    private void setIndexMatrix(final XSSFWorkbook workbook, final XSSFSheet sheet, final ERTable table, final CellLocation cellLocation, final MatrixCellStyle matrixCellStyle, final boolean isLogical) {
+    private void setIndexMatrix(final HSSFWorkbook workbook, final HSSFSheet sheet, final ERTable table, final CellLocation cellLocation, final MatrixCellStyle matrixCellStyle, final boolean isLogical) {
 
         int rowNum = cellLocation.r;
         final int columnNum = cellLocation.c;
 
-        final XSSFRow headerTemplateRow = sheet.getRow(rowNum);
-        final XSSFCell headerTemplateCell = headerTemplateRow.getCell(columnNum);
+        final HSSFRow headerTemplateRow = sheet.getRow(rowNum);
+        final HSSFCell headerTemplateCell = headerTemplateRow.getCell(columnNum);
 
         final int num = table.getIndexes().size();
 
         if (num == 0) {
             headerTemplateRow.removeCell(headerTemplateCell);
 
-            final XSSFRow row = sheet.getRow(rowNum - 1);
+            final HSSFRow row = sheet.getRow(rowNum - 1);
             if (row != null) {
-                final XSSFCell cell = row.getCell(columnNum);
+                final HSSFCell cell = row.getCell(columnNum);
                 if (cell != null) {
                     cell.getCellStyle().setBorderBottom(headerTemplateCell.getCellStyle().getBorderBottom());
                 }
@@ -280,17 +278,17 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
             return;
         }
 
-        final XSSFRow headerRow = sheet.createRow(rowNum++);
+        final HSSFRow headerRow = sheet.createRow(rowNum++);
 
         for (int i = 0; i < num + 1; i++) {
-            final XSSFCell cell = headerRow.createCell(columnNum + i);
+            final HSSFCell cell = headerRow.createCell(columnNum + i);
 
             if (i == 0) {
                 cell.setCellStyle(matrixCellStyle.style11);
 
             } else {
                 final Index index = table.getIndexes().get(i - 1);
-                final XSSFRichTextString text = new XSSFRichTextString(index.getName());
+                final HSSFRichTextString text = new HSSFRichTextString(index.getName());
                 cell.setCellValue(text);
 
                 if (i != num) {
@@ -305,10 +303,10 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         for (int j = 0; j < columnSize; j++) {
             final NormalColumn normalColumn = table.getExpandedColumns().get(j);
 
-            final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+            final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
 
             for (int i = 0; i < num + 1; i++) {
-                final XSSFCell cell = row.createCell(columnNum + i);
+                final HSSFCell cell = row.createCell(columnNum + i);
 
                 if (i == 0) {
                     String columnName = null;
@@ -318,7 +316,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
                         columnName = normalColumn.getPhysicalName();
                     }
 
-                    final XSSFRichTextString text = new XSSFRichTextString(columnName);
+                    final HSSFRichTextString text = new HSSFRichTextString(columnName);
                     cell.setCellValue(text);
                     cell.setCellStyle(headerTemplateCell.getCellStyle());
 
@@ -356,22 +354,22 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         }
     }
 
-    private void setComplexUniqueKeyMatrix(final XSSFWorkbook workbook, final XSSFSheet sheet, final ERTable table, final CellLocation cellLocation, final MatrixCellStyle matrixCellStyle, final boolean isLogical) {
+    private void setComplexUniqueKeyMatrix(final HSSFWorkbook workbook, final HSSFSheet sheet, final ERTable table, final CellLocation cellLocation, final MatrixCellStyle matrixCellStyle, final boolean isLogical) {
 
         int rowNum = cellLocation.r;
         final int columnNum = cellLocation.c;
 
-        final XSSFRow headerTemplateRow = sheet.getRow(rowNum);
-        final XSSFCell headerTemplateCell = headerTemplateRow.getCell(columnNum);
+        final HSSFRow headerTemplateRow = sheet.getRow(rowNum);
+        final HSSFCell headerTemplateCell = headerTemplateRow.getCell(columnNum);
 
         final int num = table.getComplexUniqueKeyList().size();
 
         if (num == 0) {
             headerTemplateRow.removeCell(headerTemplateCell);
 
-            final XSSFRow row = sheet.getRow(rowNum - 1);
+            final HSSFRow row = sheet.getRow(rowNum - 1);
             if (row != null) {
-                final XSSFCell cell = row.getCell(columnNum);
+                final HSSFCell cell = row.getCell(columnNum);
                 if (cell != null) {
                     cell.getCellStyle().setBorderBottom(headerTemplateCell.getCellStyle().getBorderBottom());
                 }
@@ -379,17 +377,17 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
             return;
         }
 
-        final XSSFRow headerRow = sheet.createRow(rowNum++);
+        final HSSFRow headerRow = sheet.createRow(rowNum++);
 
         for (int i = 0; i < num + 1; i++) {
-            final XSSFCell cell = headerRow.createCell(columnNum + i);
+            final HSSFCell cell = headerRow.createCell(columnNum + i);
 
             if (i == 0) {
                 cell.setCellStyle(matrixCellStyle.style11);
 
             } else {
                 final ComplexUniqueKey complexUniqueKey = table.getComplexUniqueKeyList().get(i - 1);
-                final XSSFRichTextString text = new XSSFRichTextString(Format.null2blank(complexUniqueKey.getUniqueKeyName()));
+                final HSSFRichTextString text = new HSSFRichTextString(Format.null2blank(complexUniqueKey.getUniqueKeyName()));
                 cell.setCellValue(text);
 
                 if (i != num) {
@@ -404,10 +402,10 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
         for (int j = 0; j < columnSize; j++) {
             final NormalColumn normalColumn = table.getExpandedColumns().get(j);
 
-            final XSSFRow row = POIUtils.insertRow(sheet, rowNum++);
+            final HSSFRow row = POIUtils.insertRow(sheet, rowNum++);
 
             for (int i = 0; i < num + 1; i++) {
-                final XSSFCell cell = row.createCell(columnNum + i);
+                final HSSFCell cell = row.createCell(columnNum + i);
 
                 if (i == 0) {
                     String columnName = null;
@@ -417,7 +415,7 @@ public class TableSheetGenerator extends AbstractSheetGenerator {
                         columnName = normalColumn.getPhysicalName();
                     }
 
-                    final XSSFRichTextString text = new XSSFRichTextString(columnName);
+                    final HSSFRichTextString text = new HSSFRichTextString(columnName);
                     cell.setCellValue(text);
                     cell.setCellStyle(headerTemplateCell.getCellStyle());
 
